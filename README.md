@@ -24,7 +24,7 @@ transportes y destinos, garantizando integridad y normalización hasta 3NF.
 ## 📊 Diagrama ER
 El DER refleja la estructura lógica del sistema, incluyendo clientes, reservas, paquetes turísticos, destinos, transportes, seguros y métodos de pago.
 
-![Diagrama DER](docs/diagrama_bd_agencia_turismo.png)
+![Diagrama DER](diagrama_bd_agencia_turismo.jpg)
 
 ## 🚀 Próximos pasos
 - API REST
