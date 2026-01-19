@@ -1,51 +1,35 @@
-# 🗄️ Agencia de Turismo - Relational Database Project
+# Agencia de Turismo – Base de Datos Relacional
 
-## 📌 Description
-This project represents the final relational database developed during the course.
-It models the information system of a tourism agency, including clients, reservations,
-payments and related entities.
+## 📌 Descripción
+Sistema de base de datos para la gestión de una agencia de turismo.
+Permite administrar clientes, paquetes turísticos, reservas, seguros,
+transportes y destinos, garantizando integridad y normalización hasta 3NF.
 
-The database was designed using relational principles such as normalization,
-primary keys, foreign keys and referential integrity.
+## 🧱 Modelo de Datos
+- Normalización hasta Tercera Forma Normal (3NF)
+- Relaciones N:N resueltas mediante tablas intermedias
+- Integridad referencial mediante claves foráneas
+- Validaciones con CHECK constraints
 
-## 🛠️ Technologies
-- SQL Server
-- T-SQL
-- Relational Database Design
+## ⚙️ Funcionalidades
+- Alta y baja lógica de clientes
+- Reserva de paquetes con control de cupo
+- Gestión de seguros y transportes
+- Stored Procedures para lógica de negocio
+- Índices para optimización de consultas
 
-## 📂 Project Structure
-sql/
+## 🛠️ Tecnologías
+- SQL Server (T-SQL)
 
-Database creation scripts
+## 📊 Diagrama ER
+El DER refleja la estructura lógica del sistema, incluyendo clientes, reservas, paquetes turísticos, destinos, transportes, seguros y métodos de pago.
 
-Tables and constraints
+![Diagrama DER](docs/diagrama_bd_agencia_turismo.png)
 
-Sample data
-docs/
-
-Entity-Relationship Model
-
-Functional description
+## 🚀 Próximos pasos
+- API REST
+- Frontend web
+- Autenticación de usuarios
 
 
-## 🧠 What was learned
-- Relational modeling
-- Entity-Relationship design
-- Normalization
-- Foreign keys and constraints
-- Data consistency and integrity
-- SQL scripting for full database deployment
 
-## 🚀 How to use
-1. Open SQL Server Management Studio
-2. Execute the script located in `/sql`
-3. The database will be created and populated automatically
-
-## 📈 Future Improvements
-- Integration with a backend API
-- Development of a frontend interface
-- Stored procedures for business logic
-- User authentication and roles
-
-## 👤 Author
-Nicolas Agustin Amarilla
