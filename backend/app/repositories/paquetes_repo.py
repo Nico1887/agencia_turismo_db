@@ -24,17 +24,17 @@ def obtener_paquetes():
     conn.close()
     return paquetes
 
-def create_paquete(paquete):
+def create_paquete(resultadoConsulta):
     conn = get_connection()
     cursor = conn.cursor()
 
-    if paquete.id is not None:
+    if resultadoConsulta.id is not None:
         cursor.execute("SET IDENTITY_INSERT Paquete ON")
         cursor.execute("""
             INSERT INTO Paquete (PaqueteID, Descripcion, Precio, NivelServicioID, CupoMaximo)
             OUTPUT INSERTED.PaqueteID
             VALUES (?, ?, ?, ?, ?)
-        """, paquete.id, paquete.nombre, paquete.precio, paquete.nivelServicio, paquete.cupo)
+        """, resultadoConsulta.id, resultadoConsulta.nombre, resultadoConsulta.precio, resultadoConsulta.nivelServicio, resultadoConsulta.cupo)
         paquete_id = cursor.fetchone()[0]
         cursor.execute("SET IDENTITY_INSERT Paquete OFF")
     else:
@@ -42,14 +42,96 @@ def create_paquete(paquete):
             INSERT INTO Paquete (Descripcion, Precio, NivelServicioID, CupoMaximo)
             OUTPUT INSERTED.PaqueteID
             VALUES (?, ?, ?, ?)
-        """, paquete.nombre, paquete.precio, paquete.nivelServicio, paquete.cupo)
+        """, resultadoConsulta.nombre, resultadoConsulta.precio, resultadoConsulta.nivelServicio, resultadoConsulta.cupo)
         paquete_id = cursor.fetchone()[0]
 
     conn.commit()
     conn.close()
     return {
         'id' : paquete_id,
-        'nombre' : paquete.nombre,
-        'precio' : paquete.precio,
-        'cupo' : paquete.cupo
+        'nombre' : resultadoConsulta.nombre,
+        'precio' : resultadoConsulta.precio,
+        'cupo' : resultadoConsulta.cupo
     }
+
+def obtener_paquete_via_ID(id : int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT PaqueteID, Descripcion, Precio, NivelServicioID, CupoMaximo
+        FROM Paquete
+        WHERE PaqueteID = ?
+        """, id
+    )
+    resultadoConsulta = cursor.fetchone()
+    if resultadoConsulta is None:
+        return None
+    else:
+        paquete_resultado =  {
+        'id' : resultadoConsulta[0],
+        'nombre' : resultadoConsulta[1],
+        'precio' : resultadoConsulta[2],
+        'nivelServicio' : resultadoConsulta[3],
+        'cupo' : resultadoConsulta[4]
+        }
+    conn.close()
+    return paquete_resultado
+    
+def elimacion_fisica_paquete(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        DELETE FROM Paquete WHERE PaqueteID = ?
+        """, id
+    )
+    cursor.commit()
+    conn.close
+
+    filas_afectadas = cursor.rowcount
+    return filas_afectadas > 0
+
+def actualizacion_paquete(id, nuevos_datos):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT PaqueteID, Descripcion FROM Paquete WHERE PaqueteID = ?
+        """, id)
+    
+    resultadoConsulta = cursor.fetchone()
+    if resultadoConsulta is None:
+        conn.close()
+        return None
+    
+    cursor.execute(
+        """
+        UPDATE Paquete
+        SET
+        Descripcion = ?,
+        Precio = ?,
+        NivelServicioID = ?,
+        CupoMaximo = ?
+        WHERE PaqueteID = ?
+        """, nuevos_datos.nombre, nuevos_datos.precio, nuevos_datos.nivelServicio, nuevos_datos.cupo, id
+    )
+    conn.commit()
+
+
+    cursor.execute(
+        """
+        SELECT PaqueteID, Descripcion, Precio, NivelServicioID, CupoMaximo FROM Paquete WHERE PaqueteID = ?
+        """, id)
+    resultadoConsulta = cursor.fetchone()
+
+    datos_actualizados = {
+        'id' : resultadoConsulta[0],
+        'nombre' : resultadoConsulta[1],
+        'precio' : resultadoConsulta[2],
+        'nivelServicio' : resultadoConsulta[3],
+        'cupo' : resultadoConsulta[4]
+        }
+
+    conn.close()
+    return datos_actualizados
