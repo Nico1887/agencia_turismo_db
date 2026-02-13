@@ -2,14 +2,32 @@ from app.db.database import get_connection
 
 
 
-def obtener_paquetes():
+def obtener_paquetes(precio_min=None, nivelServicio=None, offset=0, size=10):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT PaqueteID, Descripcion, Precio, CupoMaximo
+    query = ("""
+        SELECT PaqueteID, Descripcion, Precio, NivelServicioID, CupoMaximo
         FROM Paquete
+        WHERE 1=1
     """)
+
+    params = []
+
+    if precio_min is not None:
+        query += " AND Precio >= ?"
+        params.append(precio_min)
+
+    if nivelServicio is not None:
+        query += " AND NivelServicioID = ?"
+        params.append(nivelServicio)
+
+        query += " ORDER BY PaqueteID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY"
+        params.append(offset)
+        params.append(size)
+        
+
+    cursor.execute(query, params)
 
     paquetes = []
 
@@ -18,6 +36,7 @@ def obtener_paquetes():
             "id": row.PaqueteID,
             "nombre": row.Descripcion,
             "precio": row.Precio,
+            'nivelServicio' : row.NivelServicioID,
             "cupo": row.CupoMaximo
         })
 

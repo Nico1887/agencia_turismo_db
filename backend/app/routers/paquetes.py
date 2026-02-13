@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Query
 from app.models.paquete import Paquete
 from app.models.paqueteCreate import PaqueteCreated, PaqueteCreate
 from app.models.paqueteNuevo import PaqueteNuevo, PaqueteNuevoSalida
@@ -8,8 +8,14 @@ router = APIRouter()
 
 
 @router.get('/paquetes', response_model=list[Paquete])
-def get_paquetes():
-    return listar_paquetes()
+def get_paquetes(
+    page: int = Query(1, ge=1),
+    size: int = Query(10, ge=1, le=100),
+    precio_min: float | None = None,
+    nivelServicio: int | None = None
+):
+
+    return listar_paquetes(page, size, precio_min, nivelServicio)
 
 @router.post('/paquetes', response_model =PaqueteCreated)
 def post_paquetes(paquete : PaqueteCreate):
