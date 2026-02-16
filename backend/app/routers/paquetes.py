@@ -2,12 +2,13 @@ from fastapi import APIRouter, HTTPException, status, Query
 from app.models.paquete import Paquete
 from app.models.paqueteCreate import PaqueteCreated, PaqueteCreate
 from app.models.paqueteNuevo import PaqueteNuevo, PaqueteNuevoSalida
+from app.models.paquetePaginado import PaquetePaginado
 from app.services.paquetes_services import listar_paquetes, crear_paquete, conseguir_paquete, eliminar_paquete, actualizar_paquete
 
 router = APIRouter()
 
 
-@router.get('/paquetes', response_model=list[Paquete])
+@router.get('/paquetes', response_model=PaquetePaginado)
 def get_paquetes(
     page: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=100),

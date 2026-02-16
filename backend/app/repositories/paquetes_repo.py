@@ -6,28 +6,38 @@ def obtener_paquetes(precio_min=None, nivelServicio=None, offset=0, size=10):
     conn = get_connection()
     cursor = conn.cursor()
 
-    query = ("""
-        SELECT PaqueteID, Descripcion, Precio, NivelServicioID, CupoMaximo
+    #Base de la consulta
+    base_query = """
         FROM Paquete
         WHERE 1=1
-    """)
+    """
 
     params = []
 
+    #Filtros dinámicos
     if precio_min is not None:
-        query += " AND Precio >= ?"
+        base_query += " AND Precio >= ?"
         params.append(precio_min)
 
     if nivelServicio is not None:
-        query += " AND NivelServicioID = ?"
+        base_query += " AND NivelServicioID = ?"
         params.append(nivelServicio)
 
-        query += " ORDER BY PaqueteID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY"
-        params.append(offset)
-        params.append(size)
-        
+    count_query = "SELECT COUNT(*) " + base_query
+    cursor.execute(count_query, params)
+    total = cursor.fetchone()[0]
 
-    cursor.execute(query, params)
+    paginated_query = """
+        SELECT PaqueteID, Descripcion, Precio, NivelServicioID, CupoMaximo
+    """ + base_query + """
+        ORDER BY PaqueteID
+        OFFSET ? ROWS
+        FETCH NEXT ? ROWS ONLY
+    """
+
+    paginated_params = params + [offset, size]
+
+    cursor.execute(paginated_query, paginated_params)
 
     paquetes = []
 
@@ -36,41 +46,35 @@ def obtener_paquetes(precio_min=None, nivelServicio=None, offset=0, size=10):
             "id": row.PaqueteID,
             "nombre": row.Descripcion,
             "precio": row.Precio,
-            'nivelServicio' : row.NivelServicioID,
+            "nivelServicio": row.NivelServicioID,
             "cupo": row.CupoMaximo
         })
 
     conn.close()
-    return paquetes
 
-def create_paquete(resultadoConsulta):
+    return paquetes, total
+
+def create_paquete(paquete):
     conn = get_connection()
     cursor = conn.cursor()
-
-    if resultadoConsulta.id is not None:
-        cursor.execute("SET IDENTITY_INSERT Paquete ON")
-        cursor.execute("""
-            INSERT INTO Paquete (PaqueteID, Descripcion, Precio, NivelServicioID, CupoMaximo)
-            OUTPUT INSERTED.PaqueteID
-            VALUES (?, ?, ?, ?, ?)
-        """, resultadoConsulta.id, resultadoConsulta.nombre, resultadoConsulta.precio, resultadoConsulta.nivelServicio, resultadoConsulta.cupo)
-        paquete_id = cursor.fetchone()[0]
-        cursor.execute("SET IDENTITY_INSERT Paquete OFF")
-    else:
-        cursor.execute("""
-            INSERT INTO Paquete (Descripcion, Precio, NivelServicioID, CupoMaximo)
-            OUTPUT INSERTED.PaqueteID
-            VALUES (?, ?, ?, ?)
-        """, resultadoConsulta.nombre, resultadoConsulta.precio, resultadoConsulta.nivelServicio, resultadoConsulta.cupo)
-        paquete_id = cursor.fetchone()[0]
-
+    cursor.execute(
+        """
+        INSERT INTO Paquete (Descripcion, Precio, NivelServicioID, CupoMaximo)
+        OUTPUT INSERTED.PaqueteID, INSERTED.Descripcion, INSERTED.Precio, INSERTED.NivelServicioID, INSERTED.CupoMaximo
+        VALUES (?, ?, ?, ?)
+        """,
+        paquete.nombre, paquete.precio, paquete.nivelServicio, paquete.cupo
+    )
+    row = cursor.fetchone()
     conn.commit()
     conn.close()
+
     return {
-        'id' : paquete_id,
-        'nombre' : resultadoConsulta.nombre,
-        'precio' : resultadoConsulta.precio,
-        'cupo' : resultadoConsulta.cupo
+        "id": row[0],
+        "nombre": row[1],
+        "precio": row[2],
+        "nivelServicio": row[3],
+        "cupo": row[4]
     }
 
 def obtener_paquete_via_ID(id : int):
