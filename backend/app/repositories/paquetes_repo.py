@@ -54,6 +54,17 @@ def obtener_paquetes(precio_min=None, nivelServicio=None, offset=0, size=10):
 
     return paquetes, total
 
+#Validamos que exista el nivel de servicio previo a una inserción. 
+#Ya que si bien la DB con su constraint valida no lo hace la API
+def existe_nivel_servicio(nivel_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT 1 FROM NivelServicio WHERE NivelServicioID = ?",
+        nivel_id
+    )
+    return cursor.fetchone() is not None
+
 def create_paquete(paquete):
     conn = get_connection()
     cursor = conn.cursor()

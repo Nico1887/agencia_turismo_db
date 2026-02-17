@@ -1,6 +1,6 @@
 import math
 from fastapi import HTTPException
-from app.repositories.paquetes_repo import obtener_paquetes, create_paquete, obtener_paquete_via_ID, elimacion_fisica_paquete, actualizacion_paquete
+from app.repositories.paquetes_repo import existe_nivel_servicio, obtener_paquetes, create_paquete, obtener_paquete_via_ID, elimacion_fisica_paquete, actualizacion_paquete
 
 def listar_paquetes(
         page: int,
@@ -37,6 +37,8 @@ def crear_paquete(paquete):
         raise HTTPException(status_code=400, detail="El precio debe ser mayor a 0")
     if paquete.cupo <= 0:
         raise HTTPException(status_code=400, detail="El cupo debe ser mayor a 0")
+    if not existe_nivel_servicio(paquete.nivelServicio):
+        raise HTTPException(status_code=400, detail="Nivel de servicio invalido")
     return create_paquete(paquete)
 
 def conseguir_paquete(id):

@@ -18,7 +18,7 @@ def get_paquetes(
 
     return listar_paquetes(page, size, precio_min, nivelServicio)
 
-@router.post('/paquetes', response_model =PaqueteCreated)
+@router.post('/paquetes', response_model =PaqueteCreated, status_code=201)
 def post_paquetes(paquete : PaqueteCreate):
     return crear_paquete(paquete)
 
